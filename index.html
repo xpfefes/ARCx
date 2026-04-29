@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ARCx - Programma Telemetria</title>
+  <style>
+    :root {
+      --bg: #07111f;
+      --panel: rgba(10, 22, 40, 0.92);
+      --panel-2: rgba(14, 29, 52, 0.92);
+      --text: #eaf2ff;
+      --muted: #a9b8d4;
+      --line: rgba(122, 160, 255, 0.16);
+      --accent: #66a3ff;
+      --accent-2: #9dd7ff;
+      --good: #4ee59a;
+      --bad: #ff6b7a;
+      --shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+      --radius: 20px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(102, 163, 255, 0.15), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(78, 229, 154, 0.10), transparent 28%),
+        linear-gradient(180deg, #050b14 0%, #07111f 100%);
+      color: var(--text);
+      padding: 22px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    .wrap {
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel) 0%, rgba(10, 22, 40, 0.82) 100%);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      padding: 26px 26px 18px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(135deg, rgba(102, 163, 255, 0.18), transparent 45%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      color: var(--accent-2);
+      margin-bottom: 14px;
+      text-transform: uppercase;
+      font-size: 0.88rem;
+    }
+
+    .brand-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--good);
+      box-shadow: 0 0 14px rgba(78, 229, 154, 0.8);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      margin: 0;
+      color: var(--muted);
+      font-size: 1rem;
+      line-height: 1.55;
+      max-width: 70ch;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, var(--panel-2), rgba(14, 29, 52, 0.78));
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+    }
+
+    .section-title {
+      margin: 0 0 14px;
+      font-size: 1.02rem;
+      color: var(--accent-2);
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #f0f6ff;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      border: 1px solid rgba(157, 215, 255, 0.18);
+      border-radius: 14px;
+      background: rgba(4, 10, 18, 0.72);
+      color: var(--text);
+      padding: 14px 14px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
+    }
+
+    input:focus {
+      border-color: rgba(102, 163, 255, 0.62);
+      box-shadow: 0 0 0 4px rgba(102, 163, 255, 0.12);
+    }
+
+    .hint {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .checks {
+      display: grid;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .check {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(157, 215, 255, 0.12);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .check input {
+      margin-top: 4px;
+      transform: scale(1.1);
+      accent-color: var(--accent);
+    }
+
+    .check span {
+      display: block;
+      line-height: 1.45;
+      color: #e9f2ff;
+    }
+
+    .mini {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+      line-height: 1.4;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      font-weight: 700;
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: transform .14s ease, opacity .14s ease, box-shadow .14s ease;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #6aa5ff, #8fd4ff);
+      color: #04111f;
+      box-shadow: 0 12px 30px rgba(102, 163, 255, 0.28);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border: 1px solid rgba(157, 215, 255, 0.18);
+    }
+
+    .sidebox {
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .note {
+      border-left: 3px solid var(--accent);
+      padding: 12px 14px;
+      background: rgba(102, 163, 255, 0.08);
+      border-radius: 12px;
+      color: #dbeaff;
+      line-height: 1.55;
+    }
+
+    .legal {
+      border-top: 1px solid var(--line);
+      padding: 18px 18px 22px;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 0.95rem;
+    }
+
+    .legal strong {
+      color: #eef5ff;
+    }
+
+    .goodbye {
+      display: none;
+      padding: 28px 18px;
+      text-align: center;
+    }
+
+    .goodbye h2 {
+      margin: 0 0 10px;
+      color: var(--good);
+    }
+
+    .goodbye p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .summary {
+      display: none;
+      padding: 22px 18px 26px;
+    }
+
+    .summary h2 {
+      margin: 0 0 10px;
+      color: var(--good);
+    }
+
+    .summary p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .summary-box {
+      text-align: left;
+      background: rgba(4, 10, 18, 0.78);
+      border: 1px solid rgba(157, 215, 255, 0.16);
+      border-radius: 16px;
+      padding: 16px;
+      line-height: 1.7;
+      color: #eef5ff;
+    }
+
+    .summary-box strong {
+      color: var(--accent-2);
+    }
+
+    @media (max-width: 800px) {
+      .content { grid-template-columns: 1fr; }
+      body { padding: 14px; }
+      .hero { padding: 20px 18px 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" id="mainCard">
+      <header class="hero">
+        <div class="brand"><span class="brand-dot"></span> Programma telemetria ARCx</div>
+        <h1>Vuoi partecipare al programma ARCx?</h1>
+        <p class="subtitle">
+          Questo programma raccoglie dati di utilizzo per capire come va il prodotto, migliorare le prestazioni,
+          stimare meglio i casi d’uso e preparare aggiornamenti e opportunità future. Le email sono facoltative
+          e servono solo se scegli di riceverle.
+        </p>
+      </header>
+
+      <div class="content">
+        <section class="panel">
+          <h2 class="section-title">Dati del profilo</h2>
+
+          <div class="field">
+            <label for="nome">Nome</label>
+            <input id="nome" type="text" placeholder="Il tuo nome" autocomplete="name" />
+            <div class="hint">Serve solo il nome. Niente giri strani, niente moduli vampiro.</div>
+          </div>
+
+          <div class="field">
+            <label for="email">Email opzionale</label>
+            <input id="email" type="email" placeholder="nome@email.com" autocomplete="email" />
+            <div class="hint">Compilala solo se vuoi ricevere aggiornamenti via email.</div>
+          </div>
+
+          <div class="checks">
+            <label class="check">
+              <input id="consentData" type="checkbox" />
+              <span>
+                Accetto l’uso dei miei dati di utilizzo e telemetria per migliorare ARCx, fare stime sulle prestazioni
+                e rendere più utili gli aggiornamenti.
+                <span class="mini">Puoi togliere il consenso in qualunque momento.</span>
+              </span>
+            </label>
+
+            <label class="check">
+              <input id="consentEmail" type="checkbox" />
+              <span>
+                Accetto di ricevere email su aggiornamenti, opportunità e novità di ARCx.
+                <span class="mini">Se selezioni questa opzione, inserisci manualmente la tua email nel campo sopra.</span>
+              </span>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button class="btn-primary" id="continueBtn">Accetto e continuo</button>
+            <button class="btn-secondary" id="rejectBtn">No, grazie</button>
+          </div>
+        </section>
+
+        <aside class="sidebox">
+          <section class="panel">
+            <h2 class="section-title">Come funziona</h2>
+            <div class="note">
+              Se accetti la telemetria, ARCx può usare i dati in forma aggregata o tecnica per capire meglio
+              FPS, carico CPU/GPU, aggiornamenti e qualità del prodotto. Se accetti le email, il tuo indirizzo
+              verrà usato solo per contattarti con quelle comunicazioni.
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2 class="section-title">Diritto d’autore</h2>
+            <div class="note">
+              © 2026 ARCx. Tutti i diritti riservati.<br />
+              Testi, grafica, marchi e contenuti restano di proprietà dell’autore o del progetto ARCx,
+              salvo diversa indicazione. Nessun diritto viene ceduto automaticamente con l’uso del programma.
+            </div>
+          </section>
+        </aside>
+      </div>
+
+      <footer class="legal">
+        <strong>Leggi UE seguite:</strong> Regolamento (UE) 2016/679, cioè GDPR, per liceità del trattamento,
+        consenso, trasparenza e diritti dell’interessato; e Direttiva 2002/58/CE, cioè ePrivacy, per le email
+        di marketing e le comunicazioni elettroniche.<br /><br />
+        <strong>Diritti dell’utente:</strong> accesso, rettifica, cancellazione, limitazione, opposizione,
+        portabilità e revoca del consenso. Le persone devono poter ricevere le informazioni in modo chiaro
+        e poter esercitare i propri diritti facilmente.
+      </footer>
+    </div>
+
+    <div class="card summary" id="summaryCard">
+      <h2>Registrazione completata ✅</h2>
+      <p>
+        Fai uno screenshot di questa schermata e mandalo all’operatore.
+      </p>
+      <div class="summary-box" id="summaryBox"></div>
+      <div class="actions" style="justify-content:center; margin-top:18px;">
+        <button class="btn-secondary" id="backBtn">Torna indietro</button>
+      </div>
+    </div>
+
+    <div class="card goodbye" id="goodbyeCard">
+      <h2>Ok, puoi chiudere la pagina</h2>
+      <p>Grazie per il tuo tempo ✨</p>
+    </div>
+  </div>
+
+  <script>
+    const consentEmail = document.getElementById('consentEmail');
+    const emailField = document.getElementById('email');
+    const consentData = document.getElementById('consentData');
+    const continueBtn = document.getElementById('continueBtn');
+    const rejectBtn = document.getElementById('rejectBtn');
+    const backBtn = document.getElementById('backBtn');
+
+    const mainCard = document.getElementById('mainCard');
+    const goodbyeCard = document.getElementById('goodbyeCard');
+    const summaryCard = document.getElementById('summaryCard');
+    const summaryBox = document.getElementById('summaryBox');
+
+    const STORAGE_KEY = 'arcx_user_consent';
+
+    consentEmail.addEventListener('change', () => {
+      if (consentEmail.checked) {
+        emailField.setAttribute('required', 'required');
+      } else {
+        emailField.removeAttribute('required');
+      }
+    });
+
+    function showSummary(payload) {
+      summaryBox.innerHTML = `
+        <strong>Nome:</strong> ${payload.nome}<br>
+        <strong>Email:</strong> ${payload.email || 'Non fornita'}<br>
+        <strong>Consenso telemetria:</strong> ${payload.consenteTelemetria ? 'SI' : 'NO'}<br>
+        <strong>Consenso email:</strong> ${payload.consenteEmail ? 'SI' : 'NO'}<br>
+        <strong>Data:</strong> ${payload.timestamp}<br>
+        <strong>Nota:</strong> dati salvati nel dispositivo con localStorage
+      `;
+
+      mainCard.style.display = 'none';
+      goodbyeCard.style.display = 'none';
+      summaryCard.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    continueBtn.addEventListener('click', () => {
+      const nome = document.getElementById('nome').value.trim();
+      const email = emailField.value.trim();
+
+      if (!nome) {
+        alert('Inserisci il nome.');
+        return;
+      }
+
+      if (!consentData.checked) {
+        alert('Devi accettare l’uso dei dati di telemetria per continuare.');
+        return;
+      }
+
+      if (consentEmail.checked && !email) {
+        alert('Hai selezionato le email, quindi inserisci la tua email manualmente.');
+        return;
+      }
+
+      const payload = {
+        nome,
+        email: consentEmail.checked ? email : '',
+        consenteTelemetria: consentData.checked,
+        consenteEmail: consentEmail.checked,
+        timestamp: new Date().toLocaleString()
+      };
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      showSummary(payload);
+    });
+
+    rejectBtn.addEventListener('click', () => {
+      mainCard.style.display = 'none';
+      summaryCard.style.display = 'none';
+      goodbyeCard.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    backBtn.addEventListener('click', () => {
+      summaryCard.style.display = 'none';
+      goodbyeCard.style.display = 'none';
+      mainCard.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        try {
+          const payload = JSON.parse(saved);
+          showSummary(payload);
+        } catch (e) {
+          console.warn('Salvataggio locale non valido');
+        }
+      }
+    });
+  </script>
+</body>
+</html>
