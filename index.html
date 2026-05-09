@@ -1,495 +1,527 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>ARCx - Programma Telemetria</title>
-  <style>
-    :root {
-      --bg: #07111f;
-      --panel: rgba(10, 22, 40, 0.92);
-      --panel-2: rgba(14, 29, 52, 0.92);
-      --text: #eaf2ff;
-      --muted: #a9b8d4;
-      --line: rgba(122, 160, 255, 0.16);
-      --accent: #66a3ff;
-      --accent-2: #9dd7ff;
-      --good: #4ee59a;
-      --bad: #ff6b7a;
-      --shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
-      --radius: 20px;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Gravity Explorer: Calcola il tuo peso e salto su altri pianeti con dati NASA.">
+    <!-- CSP per sicurezza: blocca script inline non autorizzati e risorse esterne non necessarie -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';">
+    <title>Gravity Explorer | Cyber-NASA Edition</title>
+    
+    <!-- Font Futuristico -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; min-height: 100%; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(102, 163, 255, 0.15), transparent 32%),
-        radial-gradient(circle at bottom right, rgba(78, 229, 154, 0.10), transparent 28%),
-        linear-gradient(180deg, #050b14 0%, #07111f 100%);
-      color: var(--text);
-      padding: 22px;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
-    }
+    <style>
+        :root {
+            /* Cyber-NASA Palette */
+            --bg-deep: #05070a;
+            --bg-panel: #0b0f19;
+            --neon-cyan: #00f3ff;
+            --neon-blue: #0066ff;
+            --neon-purple: #b026ff;
+            --text-main: #e0e6ed;
+            --text-dim: #8b9bb4;
+            --border-glow: rgba(0, 243, 255, 0.3);
+            --font-display: 'Orbitron', sans-serif;
+            --font-body: 'Rajdhani', sans-serif;
+            --card-radius: 12px;
+            --transition-speed: 0.3s;
+        }
 
-    .wrap {
-      max-width: 920px;
-      margin: 0 auto;
-    }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    .card {
-      background: linear-gradient(180deg, var(--panel) 0%, rgba(10, 22, 40, 0.82) 100%);
-      border: 1px solid var(--line);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      backdrop-filter: blur(10px);
-    }
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.15) 0%, transparent 60%),
+                linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
 
-    .hero {
-      padding: 26px 26px 18px;
-      border-bottom: 1px solid var(--line);
-      background:
-        linear-gradient(135deg, rgba(102, 163, 255, 0.18), transparent 45%),
-        linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
-    }
+        /* Scanline Effect */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.1) 0px,
+                rgba(0, 0, 0, 0.1) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 9999;
+        }
 
-    .brand {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 800;
-      letter-spacing: 0.3px;
-      color: var(--accent-2);
-      margin-bottom: 14px;
-      text-transform: uppercase;
-      font-size: 0.88rem;
-    }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 2rem 1.5rem;
+        }
 
-    .brand-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: var(--good);
-      box-shadow: 0 0 14px rgba(78, 229, 154, 0.8);
-    }
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            position: relative;
+        }
 
-    h1 {
-      margin: 0 0 10px;
-      font-size: clamp(1.6rem, 3vw, 2.4rem);
-      line-height: 1.1;
-    }
+        h1 {
+            font-family: var(--font-display);
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+            margin-bottom: 0.5rem;
+        }
 
-    .subtitle {
-      margin: 0;
-      color: var(--muted);
-      font-size: 1rem;
-      line-height: 1.55;
-      max-width: 70ch;
-    }
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
 
-    .content {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 18px;
-      padding: 18px;
-    }
+        /* Input Section */
+        .input-panel {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--card-radius);
+            padding: 2rem;
+            max-width: 500px;
+            margin: 0 auto 3rem auto;
+            box-shadow: 0 0 30px rgba(0, 102, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
 
-    .panel {
-      background: linear-gradient(180deg, var(--panel-2), rgba(14, 29, 52, 0.78));
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 18px;
-    }
+        .input-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+        }
 
-    .section-title {
-      margin: 0 0 14px;
-      font-size: 1.02rem;
-      color: var(--accent-2);
-    }
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
 
-    .field {
-      margin-bottom: 14px;
-    }
+        label {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            color: var(--neon-cyan);
+            letter-spacing: 1px;
+        }
 
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #f0f6ff;
-    }
+        input[type="number"] {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid var(--neon-blue);
+            border-radius: 6px;
+            padding: 1rem;
+            color: var(--text-main);
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            outline: none;
+            transition: all var(--transition-speed);
+        }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      border: 1px solid rgba(157, 215, 255, 0.18);
-      border-radius: 14px;
-      background: rgba(4, 10, 18, 0.72);
-      color: var(--text);
-      padding: 14px 14px;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color .15s ease, transform .15s ease, box-shadow .15s ease;
-    }
+        input[type="number"]:focus {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+        }
 
-    input:focus {
-      border-color: rgba(102, 163, 255, 0.62);
-      box-shadow: 0 0 0 4px rgba(102, 163, 255, 0.12);
-    }
+        /* Remove spinner arrows */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
 
-    .hint {
-      margin-top: 8px;
-      color: var(--muted);
-      font-size: 0.92rem;
-      line-height: 1.45;
-    }
+        .btn-calculate {
+            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+            border: none;
+            border-radius: 6px;
+            padding: 1rem 2rem;
+            color: #fff;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all var(--transition-speed);
+            position: relative;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
 
-    .checks {
-      display: grid;
-      gap: 12px;
-      margin-top: 14px;
-    }
+        .btn-calculate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.5);
+        }
 
-    .check {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      padding: 12px 12px;
-      border-radius: 14px;
-      border: 1px solid rgba(157, 215, 255, 0.12);
-      background: rgba(255,255,255,0.02);
-    }
+        .btn-calculate:active {
+            transform: translateY(0);
+        }
 
-    .check input {
-      margin-top: 4px;
-      transform: scale(1.1);
-      accent-color: var(--accent);
-    }
+        .btn-calculate::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(transparent, rgba(255,255,255,0.2), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+            opacity: 0;
+        }
 
-    .check span {
-      display: block;
-      line-height: 1.45;
-      color: #e9f2ff;
-    }
+        .btn-calculate:hover::after {
+            opacity: 1;
+            left: 100%;
+        }
 
-    .mini {
-      color: var(--muted);
-      font-size: 0.9rem;
-      margin-top: 4px;
-      line-height: 1.4;
-    }
+        .error-msg {
+            color: #ff4d4d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            min-height: 1.2em;
+            font-weight: 500;
+            text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
+        }
 
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
+        /* Results Grid */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
 
-    button {
-      border: 0;
-      border-radius: 14px;
-      padding: 13px 18px;
-      font-weight: 700;
-      font-size: 0.98rem;
-      cursor: pointer;
-      transition: transform .14s ease, opacity .14s ease, box-shadow .14s ease;
-    }
+        .results-grid.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-    button:active { transform: translateY(1px); }
+        .planet-card {
+            background: var(--bg-panel);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--card-radius);
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-speed);
+            opacity: 0;
+            transform: translateY(30px) scale(0.95);
+            animation: cardEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #6aa5ff, #8fd4ff);
-      color: #04111f;
-      box-shadow: 0 12px 30px rgba(102, 163, 255, 0.28);
-    }
+        .planet-card:hover {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
+            transform: translateY(-5px);
+        }
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text);
-      border: 1px solid rgba(157, 215, 255, 0.18);
-    }
+        .planet-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 60px; height: 60px;
+            background: radial-gradient(circle at top right, var(--neon-cyan), transparent 70%);
+            opacity: 0.1;
+        }
 
-    .sidebox {
-      display: grid;
-      gap: 14px;
-      align-content: start;
-    }
+        .planet-name {
+            font-family: var(--font-display);
+            font-size: 1.4rem;
+            color: var(--neon-cyan);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.5rem;
+        }
 
-    .note {
-      border-left: 3px solid var(--accent);
-      padding: 12px 14px;
-      background: rgba(102, 163, 255, 0.08);
-      border-radius: 12px;
-      color: #dbeaff;
-      line-height: 1.55;
-    }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.8rem;
+        }
 
-    .legal {
-      border-top: 1px solid var(--line);
-      padding: 18px 18px 22px;
-      color: var(--muted);
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }
+        .stat-label {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
 
-    .legal strong {
-      color: #eef5ff;
-    }
+        .stat-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #fff;
+        }
 
-    .goodbye {
-      display: none;
-      padding: 28px 18px;
-      text-align: center;
-    }
+        .stat-unit {
+            font-size: 0.8rem;
+            color: var(--neon-blue);
+            margin-left: 4px;
+        }
 
-    .goodbye h2 {
-      margin: 0 0 10px;
-      color: var(--good);
-    }
+        .fact-box {
+            background: rgba(0, 243, 255, 0.05);
+            border-left: 3px solid var(--neon-purple);
+            padding: 0.8rem;
+            margin-top: 1rem;
+            border-radius: 0 6px 6px 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-dim);
+        }
 
-    .goodbye p {
-      margin: 0;
-      color: var(--muted);
-    }
+        .fact-box strong {
+            color: var(--neon-cyan);
+        }
 
-    .summary {
-      display: none;
-      padding: 22px 18px 26px;
-    }
+        @keyframes cardEnter {
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
 
-    .summary h2 {
-      margin: 0 0 10px;
-      color: var(--good);
-    }
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            opacity: 0.6;
+        }
 
-    .summary p {
-      margin: 0 0 16px;
-      color: var(--muted);
-      line-height: 1.5;
-    }
-
-    .summary-box {
-      text-align: left;
-      background: rgba(4, 10, 18, 0.78);
-      border: 1px solid rgba(157, 215, 255, 0.16);
-      border-radius: 16px;
-      padding: 16px;
-      line-height: 1.7;
-      color: #eef5ff;
-    }
-
-    .summary-box strong {
-      color: var(--accent-2);
-    }
-
-    @media (max-width: 800px) {
-      .content { grid-template-columns: 1fr; }
-      body { padding: 14px; }
-      .hero { padding: 20px 18px 16px; }
-    }
-  </style>
+        /* Responsive */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .input-panel { padding: 1.5rem; }
+            .stat-value { font-size: 1.2rem; }
+        }
+    </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card" id="mainCard">
-      <header class="hero">
-        <div class="brand"><span class="brand-dot"></span> Programma telemetria ARCx</div>
-        <h1>Vuoi partecipare al programma ARCx?</h1>
-        <p class="subtitle">
-          Questo programma raccoglie dati di utilizzo per capire come va il prodotto, migliorare le prestazioni,
-          stimare meglio i casi d’uso e preparare aggiornamenti e opportunità future. Le email sono facoltative
-          e servono solo se scegli di riceverle.
-        </p>
-      </header>
 
-      <div class="content">
-        <section class="panel">
-          <h2 class="section-title">Dati del profilo</h2>
+    <div class="container">
+        <header>
+            <h1>Gravity Explorer</h1>
+            <p class="subtitle">Simulatore Gravitazionale Interplanetario</p>
+        </header>
 
-          <div class="field">
-            <label for="nome">Nome</label>
-            <input id="nome" type="text" placeholder="Il tuo nome" autocomplete="name" />
-            <div class="hint">Serve solo il nome. Niente giri strani, niente moduli vampiro.</div>
-          </div>
+        <main>
+            <section class="input-panel">
+                <div class="input-group">
+                    <label for="weightInput">Inserisci il tuo peso sulla Terra</label>
+                    <input type="number" id="weightInput" placeholder="Es. 75" min="1" max="500" step="0.1" aria-label="Peso in kg">
+                    <div id="errorMsg" class="error-msg" aria-live="polite"></div>
+                    <button id="calcBtn" class="btn-calculate">Calcola Dati</button>
+                </div>
+            </section>
 
-          <div class="field">
-            <label for="email">Email opzionale</label>
-            <input id="email" type="email" placeholder="nome@email.com" autocomplete="email" />
-            <div class="hint">Compilala solo se vuoi ricevere aggiornamenti via email.</div>
-          </div>
+            <section id="resultsGrid" class="results-grid" aria-live="polite">
+                <!-- Cards generated by JS -->
+            </section>
+        </main>
 
-          <div class="checks">
-            <label class="check">
-              <input id="consentData" type="checkbox" />
-              <span>
-                Accetto l’uso dei miei dati di utilizzo e telemetria per migliorare ARCx, fare stime sulle prestazioni
-                e rendere più utili gli aggiornamenti.
-                <span class="mini">Puoi togliere il consenso in qualunque momento.</span>
-              </span>
-            </label>
-
-            <label class="check">
-              <input id="consentEmail" type="checkbox" />
-              <span>
-                Accetto di ricevere email su aggiornamenti, opportunità e novità di ARCx.
-                <span class="mini">Se selezioni questa opzione, inserisci manualmente la tua email nel campo sopra.</span>
-              </span>
-            </label>
-          </div>
-
-          <div class="actions">
-            <button class="btn-primary" id="continueBtn">Accetto e continuo</button>
-            <button class="btn-secondary" id="rejectBtn">No, grazie</button>
-          </div>
-        </section>
-
-        <aside class="sidebox">
-          <section class="panel">
-            <h2 class="section-title">Come funziona</h2>
-            <div class="note">
-              Se accetti la telemetria, ARCx può usare i dati in forma aggregata o tecnica per capire meglio
-              FPS, carico CPU/GPU, aggiornamenti e qualità del prodotto. Se accetti le email, il tuo indirizzo
-              verrà usato solo per contattarti con quelle comunicazioni.
-            </div>
-          </section>
-
-          <section class="panel">
-            <h2 class="section-title">Diritto d’autore</h2>
-            <div class="note">
-              © 2026 ARCx. Tutti i diritti riservati.<br />
-              Testi, grafica, marchi e contenuti restano di proprietà dell’autore o del progetto ARCx,
-              salvo diversa indicazione. Nessun diritto viene ceduto automaticamente con l’uso del programma.
-            </div>
-          </section>
-        </aside>
-      </div>
-
-      <footer class="legal">
-        <strong>Leggi UE seguite:</strong> Regolamento (UE) 2016/679, cioè GDPR, per liceità del trattamento,
-        consenso, trasparenza e diritti dell’interessato; e Direttiva 2002/58/CE, cioè ePrivacy, per le email
-        di marketing e le comunicazioni elettroniche.<br /><br />
-        <strong>Diritti dell’utente:</strong> accesso, rettifica, cancellazione, limitazione, opposizione,
-        portabilità e revoca del consenso. Le persone devono poter ricevere le informazioni in modo chiaro
-        e poter esercitare i propri diritti facilmente.
-      </footer>
+        <footer>
+            <p>Dati gravitazionali basati su NASA Fact Sheets. Progetto per GitHub Pages.</p>
+        </footer>
     </div>
 
-    <div class="card summary" id="summaryCard">
-      <h2>Registrazione completata ✅</h2>
-      <p>
-        Fai uno screenshot di questa schermata e mandalo all’operatore.
-      </p>
-      <div class="summary-box" id="summaryBox"></div>
-      <div class="actions" style="justify-content:center; margin-top:18px;">
-        <button class="btn-secondary" id="backBtn">Torna indietro</button>
-      </div>
-    </div>
+    <script>
+        /**
+         * Gravity Explorer - Core Logic
+         * @version 1.0.0
+         * @author EriK 3.8.6 Max Preview
+         */
+        (function() {
+            'use strict';
 
-    <div class="card goodbye" id="goodbyeCard">
-      <h2>Ok, puoi chiudere la pagina</h2>
-      <p>Grazie per il tuo tempo ✨</p>
-    </div>
-  </div>
+            // NASA Gravity Constants (Surface gravity in m/s^2)
+            // Source: NASA Planetary Fact Sheet
+            const GRAVITY_DATA = Object.freeze({
+                earth: { g: 9.807, name: 'Terra', fact: 'La gravità terrestre è lo standard di riferimento (1g). Mantiene la nostra atmosfera e gli oceani al loro posto.' },
+                moon:  { g: 1.62,  name: 'Luna',  fact: 'La Luna ha solo il 16.6% della gravità terrestre. Gli astronauti Apollo potevano saltare facilmente nonostante le tute pesanti.' },
+                mars:  { g: 3.72,  name: 'Marte', fact: 'Marte ha circa il 38% della gravità terrestre. Un salto qui ti farebbe sentire come un supereroe, ma attento all\'atterraggio!' },
+                jupiter: { g: 24.79, name: 'Giove', fact: 'Giove è un gigante gassoso. La sua gravità è 2.5 volte quella terrestre. Camminare sarebbe impossibile, verresti schiacciato dal tuo stesso peso.' },
+                saturn: { g: 10.44, name: 'Saturno', fact: 'Nonostante le sue dimensioni enormi, Saturno ha una densità bassa. La sua gravità superficiale è solo leggermente superiore a quella terrestre.' },
+                pluto: { g: 0.62, name: 'Plutone', fact: 'Plutone è piccolo e lontano. La sua gravità è debolissima (6% della Terra). Potresti lanciare una palla da baseball in orbita!' }
+            });
 
-  <script>
-    const consentEmail = document.getElementById('consentEmail');
-    const emailField = document.getElementById('email');
-    const consentData = document.getElementById('consentData');
-    const continueBtn = document.getElementById('continueBtn');
-    const rejectBtn = document.getElementById('rejectBtn');
-    const backBtn = document.getElementById('backBtn');
+            const EARTH_JUMP_HEIGHT_CM = 50; // Base jump height on Earth
 
-    const mainCard = document.getElementById('mainCard');
-    const goodbyeCard = document.getElementById('goodbyeCard');
-    const summaryCard = document.getElementById('summaryCard');
-    const summaryBox = document.getElementById('summaryBox');
+            // DOM Elements
+            const els = {
+                input: document.getElementById('weightInput'),
+                btn: document.getElementById('calcBtn'),
+                error: document.getElementById('errorMsg'),
+                grid: document.getElementById('resultsGrid')
+            };
 
-    const STORAGE_KEY = 'arcx_user_consent';
+            /**
+             * Validates user input.
+             * @param {string} val - Raw input value.
+             * @returns {number|null} - Parsed valid number or null.
+             */
+            function validateInput(val) {
+                const num = parseFloat(val);
+                if (isNaN(num)) return null;
+                if (num <= 0) return null;
+                if (num > 1000) return null; // Sanity check
+                return num;
+            }
 
-    consentEmail.addEventListener('change', () => {
-      if (consentEmail.checked) {
-        emailField.setAttribute('required', 'required');
-      } else {
-        emailField.removeAttribute('required');
-      }
-    });
+            /**
+             * Calculates weight and jump height for a planet.
+             * @param {number} massKg - User mass in kg.
+             * @param {number} planetG - Planet gravity m/s^2.
+             * @returns {{weightKg: number, weightN: number, jumpCm: number}}
+             */
+            function calculatePhysics(massKg, planetG) {
+                const earthG = GRAVITY_DATA.earth.g;
+                
+                // Weight in kg-equivalent (what a scale would show)
+                const weightKg = massKg * (planetG / earthG);
+                
+                // Weight in Newtons (Force)
+                const weightN = massKg * planetG;
+                
+                // Jump height: inversely proportional to gravity
+                // h_planet = h_earth * (g_earth / g_planet)
+                const jumpCm = EARTH_JUMP_HEIGHT_CM * (earthG / planetG);
 
-    function showSummary(payload) {
-      summaryBox.innerHTML = `
-        <strong>Nome:</strong> ${payload.nome}<br>
-        <strong>Email:</strong> ${payload.email || 'Non fornita'}<br>
-        <strong>Consenso telemetria:</strong> ${payload.consenteTelemetria ? 'SI' : 'NO'}<br>
-        <strong>Consenso email:</strong> ${payload.consenteEmail ? 'SI' : 'NO'}<br>
-        <strong>Data:</strong> ${payload.timestamp}<br>
-        <strong>Nota:</strong> dati salvati nel dispositivo con localStorage
-      `;
+                return {
+                    weightKg: Math.round(weightKg * 100) / 100,
+                    weightN: Math.round(weightN * 100) / 100,
+                    jumpCm: Math.round(jumpCm * 100) / 100
+                };
+            }
 
-      mainCard.style.display = 'none';
-      goodbyeCard.style.display = 'none';
-      summaryCard.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+            /**
+             * Creates a Planet Card DOM element.
+             * @param {string} key - Planet key.
+             * @param {object} data - Planet data.
+             * @param {object} physics - Calculated physics.
+             * @param {number} delay - Animation delay in ms.
+             * @returns {HTMLElement}
+             */
+            function createCard(key, data, physics, delay) {
+                const card = document.createElement('article');
+                card.className = 'planet-card';
+                card.style.animationDelay = `${delay}ms`;
+                
+                // Use textContent for security (XSS prevention)
+                card.innerHTML = `
+                    <h2 class="planet-name"></h2>
+                    <div class="stat-row">
+                        <span class="stat-label">Peso Equivalente</span>
+                        <span class="stat-value"><span class="val-kg"></span><span class="stat-unit">kg</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Forza Peso</span>
+                        <span class="stat-value"><span class="val-n"></span><span class="stat-unit">N</span></span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Altezza Salto</span>
+                        <span class="stat-value"><span class="val-jump"></span><span class="stat-unit">cm</span></span>
+                    </div>
+                    <div class="fact-box">
+                        <strong>LO SAPEVI?</strong> <span class="fact-text"></span>
+                    </div>
+                `;
 
-    continueBtn.addEventListener('click', () => {
-      const nome = document.getElementById('nome').value.trim();
-      const email = emailField.value.trim();
+                // Populate safely
+                card.querySelector('.planet-name').textContent = data.name;
+                card.querySelector('.val-kg').textContent = physics.weightKg.toFixed(2);
+                card.querySelector('.val-n').textContent = physics.weightN.toFixed(2);
+                card.querySelector('.val-jump').textContent = physics.jumpCm.toFixed(1);
+                card.querySelector('.fact-text').textContent = data.fact;
 
-      if (!nome) {
-        alert('Inserisci il nome.');
-        return;
-      }
+                return card;
+            }
 
-      if (!consentData.checked) {
-        alert('Devi accettare l’uso dei dati di telemetria per continuare.');
-        return;
-      }
+            /**
+             * Main calculation and render handler.
+             */
+            function handleCalculate() {
+                const rawVal = els.input.value.trim();
+                const mass = validateInput(rawVal);
 
-      if (consentEmail.checked && !email) {
-        alert('Hai selezionato le email, quindi inserisci la tua email manualmente.');
-        return;
-      }
+                // Reset UI
+                els.error.textContent = '';
+                els.grid.innerHTML = '';
+                els.grid.classList.remove('visible');
 
-      const payload = {
-        nome,
-        email: consentEmail.checked ? email : '',
-        consenteTelemetria: consentData.checked,
-        consenteEmail: consentEmail.checked,
-        timestamp: new Date().toLocaleString()
-      };
+                if (!mass) {
+                    els.error.textContent = '⚠️ Inserisci un peso valido (es. 70.5). Max 1000 kg.';
+                    els.input.focus();
+                    return;
+                }
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-      showSummary(payload);
-    });
+                // Use DocumentFragment for batch DOM insertion (Performance)
+                const fragment = document.createDocumentFragment();
+                const planets = ['moon', 'mars', 'jupiter', 'saturn', 'pluto'];
+                let delay = 0;
 
-    rejectBtn.addEventListener('click', () => {
-      mainCard.style.display = 'none';
-      summaryCard.style.display = 'none';
-      goodbyeCard.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+                planets.forEach(key => {
+                    const pData = GRAVITY_DATA[key];
+                    const physics = calculatePhysics(mass, pData.g);
+                    const card = createCard(key, pData, physics, delay);
+                    fragment.appendChild(card);
+                    delay += 100; // Stagger animation
+                });
 
-    backBtn.addEventListener('click', () => {
-      summaryCard.style.display = 'none';
-      goodbyeCard.style.display = 'none';
-      mainCard.style.display = 'block';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+                els.grid.appendChild(fragment);
+                
+                // Trigger animation
+                requestAnimationFrame(() => {
+                    els.grid.classList.add('visible');
+                });
+            }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        try {
-          const payload = JSON.parse(saved);
-          showSummary(payload);
-        } catch (e) {
-          console.warn('Salvataggio locale non valido');
-        }
-      }
-    });
-  </script>
+            // Event Listeners
+            els.btn.addEventListener('click', handleCalculate);
+            
+            // Allow Enter key to submit
+            els.input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleCalculate();
+                }
+            });
+
+            // Input sanitization on type (allow only numbers and dot)
+            els.input.addEventListener('input', (e) => {
+                e.target.value = e.target.value.replace(/[^0-9.]/g, '');
+            });
+
+        })();
+    </script>
 </body>
 </html>
