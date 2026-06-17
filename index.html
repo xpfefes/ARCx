@@ -1,527 +1,1249 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Gravity Explorer: Calcola il tuo peso e salto su altri pianeti con dati NASA.">
-    <!-- CSP per sicurezza: blocca script inline non autorizzati e risorse esterne non necessarie -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self' 'unsafe-inline';">
-    <title>Gravity Explorer | Cyber-NASA Edition</title>
-    
-    <!-- Font Futuristico -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a2e">
+<title>Minecraft Wheel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary-dark: #1a1a2e;
+  --primary-light: #f5f5f7;
+  --accent-gold: #ffd700;
+  --accent-red: #ff6347;
+  --accent-green: #228b22;
+  --accent-blue: #4169e1;
+  --glass-dark: rgba(26, 26, 46, 0.75);
+  --border-radius-sm: 4px;
+  --border-radius-md: 8px;
+  --border-radius-lg: 16px;
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
 
-    <style>
-        :root {
-            /* Cyber-NASA Palette */
-            --bg-deep: #05070a;
-            --bg-panel: #0b0f19;
-            --neon-cyan: #00f3ff;
-            --neon-blue: #0066ff;
-            --neon-purple: #b026ff;
-            --text-main: #e0e6ed;
-            --text-dim: #8b9bb4;
-            --border-glow: rgba(0, 243, 255, 0.3);
-            --font-display: 'Orbitron', sans-serif;
-            --font-body: 'Rajdhani', sans-serif;
-            --card-radius: 12px;
-            --transition-speed: 0.3s;
-        }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: linear-gradient(180deg, #87ceeb 0%, #b8e4f9 40%, #90EE90 40%, #7ec87e 100%);
+  touch-action: manipulation;
+  overscroll-behavior: none;
+}
 
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: var(--font-body);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.15) 0%, transparent 60%),
-                linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
-        }
+body {
+  display: flex;
+  flex-direction: column;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
 
-        /* Scanline Effect */
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 0, 0, 0.1) 0px,
-                rgba(0, 0, 0, 0.1) 1px,
-                transparent 1px,
-                transparent 3px
-            );
-            pointer-events: none;
-            z-index: 9999;
-        }
+/* ===== VIEWPORT 3D ===== */
+#viewport {
+  flex: 1;
+  position: relative;
+  perspective: 900px;
+  perspective-origin: 50% 45%;
+  overflow: hidden;
+}
 
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            padding: 2rem 1.5rem;
-        }
+/* ===== 3D ROOM ===== */
+.room {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  transform-style: preserve-3d;
+  transform: rotateX(28deg);
+  transition: transform 0.3s ease-out;
+}
 
-        header {
-            text-align: center;
-            margin-bottom: 3rem;
-            position: relative;
-        }
+.room-face {
+  position: absolute;
+  backface-visibility: hidden;
+}
 
-        h1 {
-            font-family: var(--font-display);
-            font-size: clamp(2rem, 5vw, 3.5rem);
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue), var(--neon-purple));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            text-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
-            margin-bottom: 0.5rem;
-        }
+/* Pavimento Minecraft (dirt block pattern) */
+.room-face.floor {
+  width: 100%;
+  height: 100%;
+  background-color: #6b4423;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='%236b4423'/%3E%3Crect x='0' y='0' width='8' height='8' fill='%237a5030'/%3E%3Crect x='16' y='0' width='8' height='8' fill='%235c3a1e'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%235c3a1e'/%3E%3Crect x='24' y='8' width='8' height='8' fill='%237a5030'/%3E%3Crect x='0' y='16' width='8' height='8' fill='%235c3a1e'/%3E%3Crect x='16' y='16' width='8' height='8' fill='%237a5030'/%3E%3Crect x='8' y='24' width='8' height='8' fill='%237a5030'/%3E%3Crect x='24' y='24' width='8' height='8' fill='%235c3a1e'/%3E%3Ccircle cx='4' cy='4' r='1' fill='%234a2e15'/%3E%3Ccircle cx='20' cy='12' r='1' fill='%234a2e15'/%3E%3Ccircle cx='12' cy='20' r='1' fill='%234a2e15'/%3E%3Ccircle cx='28' cy='28' r='1' fill='%234a2e15'/%3E%3C/svg%3E");
+  background-size: 32px 32px;
+  image-rendering: pixelated;
+  transform: translateZ(-80px);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.3);
+}
 
-        .subtitle {
-            color: var(--text-dim);
-            font-size: 1.1rem;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+/* Parete posteriore (stone brick pattern) */
+.room-face.wall-back {
+  width: 100%;
+  height: 280px;
+  bottom: 0;
+  background-color: #8b8b8b;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Crect width='40' height='20' fill='%238b8b8b'/%3E%3Crect x='0' y='0' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='20' y='0' width='19' height='9' fill='%237a7a7a'/%3E%3Crect x='10' y='10' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='30' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3Crect x='0' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3C/svg%3E");
+  background-size: 40px 20px;
+  image-rendering: pixelated;
+  transform: translateZ(-200px) translateY(-140px);
+  box-shadow: inset 0 -20px 40px rgba(0,0,0,0.3);
+}
 
-        /* Input Section */
-        .input-panel {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-glow);
-            border-radius: var(--card-radius);
-            padding: 2rem;
-            max-width: 500px;
-            margin: 0 auto 3rem auto;
-            box-shadow: 0 0 30px rgba(0, 102, 255, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
+/* Parete sinistra */
+.room-face.wall-left {
+  width: 280px;
+  height: 280px;
+  left: 0;
+  bottom: 0;
+  background-color: #8b8b8b;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Crect width='40' height='20' fill='%238b8b8b'/%3E%3Crect x='0' y='0' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='20' y='0' width='19' height='9' fill='%237a7a7a'/%3E%3Crect x='10' y='10' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='30' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3Crect x='0' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3C/svg%3E");
+  background-size: 40px 20px;
+  image-rendering: pixelated;
+  transform: translateX(-140px) rotateY(90deg) translateY(-140px);
+  box-shadow: inset -20px 0 40px rgba(0,0,0,0.3);
+}
 
-        .input-panel::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 10px var(--neon-cyan);
-        }
+/* Parete destra */
+.room-face.wall-right {
+  width: 280px;
+  height: 280px;
+  right: 0;
+  bottom: 0;
+  background-color: #8b8b8b;
+  background-image: 
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20'%3E%3Crect width='40' height='20' fill='%238b8b8b'/%3E%3Crect x='0' y='0' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='20' y='0' width='19' height='9' fill='%237a7a7a'/%3E%3Crect x='10' y='10' width='19' height='9' fill='%239e9e9e'/%3E%3Crect x='30' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3Crect x='0' y='10' width='9' height='9' fill='%237a7a7a'/%3E%3C/svg%3E");
+  background-size: 40px 20px;
+  image-rendering: pixelated;
+  transform: translateX(140px) rotateY(-90deg) translateY(-140px);
+  box-shadow: inset 20px 0 40px rgba(0,0,0,0.3);
+}
 
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
+/* ===== WHEEL STAGE ===== */
+.wheel-stage {
+  position: absolute;
+  left: 50%;
+  top: 55%;
+  transform: translate(-50%, -50%) rotateX(-28deg);
+  transform-style: preserve-3d;
+  z-index: 5;
+}
 
-        label {
-            font-family: var(--font-display);
-            font-size: 0.9rem;
-            color: var(--neon-cyan);
-            letter-spacing: 1px;
-        }
+.wheel-shadow {
+  position: absolute;
+  width: 320px;
+  height: 80px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) translateZ(-5px);
+  background: radial-gradient(ellipse, rgba(0,0,0,0.5) 0%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(8px);
+}
 
-        input[type="number"] {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid var(--neon-blue);
-            border-radius: 6px;
-            padding: 1rem;
-            color: var(--text-main);
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            outline: none;
-            transition: all var(--transition-speed);
-        }
+.wheel-wrapper {
+  position: relative;
+  width: 300px;
+  height: 300px;
+}
 
-        input[type="number"]:focus {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
-        }
+.wheel-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.4));
+  transition: none;
+  will-change: transform;
+}
 
-        /* Remove spinner arrows */
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+.wheel-center {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, #ffd700 0%, #b8860b 100%);
+  border-radius: 50%;
+  border: 4px solid #8b6914;
+  box-shadow: 
+    0 0 0 3px #ffd700,
+    0 4px 12px rgba(0,0,0,0.5),
+    inset 0 2px 4px rgba(255,255,255,0.3);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-        .btn-calculate {
-            background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
-            border: none;
-            border-radius: 6px;
-            padding: 1rem 2rem;
-            color: #fff;
-            font-family: var(--font-display);
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            cursor: pointer;
-            transition: all var(--transition-speed);
-            position: relative;
-            overflow: hidden;
-            margin-top: 0.5rem;
-        }
+.wheel-center::after {
+  content: '';
+  width: 16px;
+  height: 16px;
+  background: #8b6914;
+  border-radius: 50%;
+  box-shadow: inset 0 2px 3px rgba(0,0,0,0.5);
+}
 
-        .btn-calculate:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.5);
-        }
+/* Pointer */
+.wheel-pointer {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 18px solid transparent;
+  border-right: 18px solid transparent;
+  border-top: 40px solid var(--accent-red);
+  left: 50%;
+  top: -30px;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+  z-index: 20;
+}
 
-        .btn-calculate:active {
-            transform: translateY(0);
-        }
+.wheel-pointer::after {
+  content: '';
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  top: -48px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 0 8px rgba(255, 99, 71, 0.8);
+}
 
-        .btn-calculate::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(transparent, rgba(255,255,255,0.2), transparent);
-            transform: rotate(45deg);
-            transition: 0.5s;
-            opacity: 0;
-        }
+/* ===== PARTICLE CANVAS ===== */
+#particle-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
 
-        .btn-calculate:hover::after {
-            opacity: 1;
-            left: 100%;
-        }
+/* ===== UI LAYER ===== */
+#ui-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  z-index: 20;
+  padding: 12px;
+  gap: 12px;
+}
 
-        .error-msg {
-            color: #ff4d4d;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-            min-height: 1.2em;
-            font-weight: 500;
-            text-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
-        }
+.glass-panel {
+  pointer-events: auto;
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background: var(--glass-dark);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-3);
+  padding: 14px;
+  color: var(--primary-light);
+}
 
-        /* Results Grid */
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  letter-spacing: 1px;
+  color: var(--accent-gold);
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
 
-        .results-grid.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
+.panel-header svg {
+  width: 26px;
+  height: 26px;
+  stroke: var(--accent-gold);
+  fill: none;
+  stroke-width: 2;
+  filter: drop-shadow(0 0 4px var(--accent-gold));
+}
 
-        .planet-card {
-            background: var(--bg-panel);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: var(--card-radius);
-            padding: 1.5rem;
-            position: relative;
-            overflow: hidden;
-            transition: all var(--transition-speed);
-            opacity: 0;
-            transform: translateY(30px) scale(0.95);
-            animation: cardEnter 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
+.input-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
 
-        .planet-card:hover {
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 25px rgba(0, 243, 255, 0.15);
-            transform: translateY(-5px);
-        }
+#name-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 14px;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  background: rgba(0, 0, 0, 0.4);
+  color: var(--primary-light);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md);
+  outline: none;
+  transition: all 0.2s ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
 
-        .planet-card::before {
-            content: '';
-            position: absolute;
-            top: 0; right: 0;
-            width: 60px; height: 60px;
-            background: radial-gradient(circle at top right, var(--neon-cyan), transparent 70%);
-            opacity: 0.1;
-        }
+#name-input:focus {
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+}
 
-        .planet-name {
-            font-family: var(--font-display);
-            font-size: 1.4rem;
-            color: var(--neon-cyan);
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            padding-bottom: 0.5rem;
-        }
+#name-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
 
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 0.8rem;
-        }
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--primary-light);
+  background: linear-gradient(135deg, rgba(74, 74, 74, 0.9), rgba(44, 44, 44, 0.9));
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 44px;
+  min-height: 44px;
+  touch-action: manipulation;
+  box-shadow: var(--shadow-2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
 
-        .stat-label {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-        }
+.btn:active {
+  transform: scale(0.95);
+  box-shadow: var(--shadow-1);
+}
 
-        .stat-value {
-            font-family: var(--font-display);
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-        }
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
 
-        .stat-unit {
-            font-size: 0.8rem;
-            color: var(--neon-blue);
-            margin-left: 4px;
-        }
+.btn svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 
-        .fact-box {
-            background: rgba(0, 243, 255, 0.05);
-            border-left: 3px solid var(--neon-purple);
-            padding: 0.8rem;
-            margin-top: 1rem;
-            border-radius: 0 6px 6px 0;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: var(--text-dim);
-        }
+.btn-primary {
+  background: linear-gradient(135deg, #2ca52c, #006400);
+  border-color: #006400;
+}
 
-        .fact-box strong {
-            color: var(--neon-cyan);
-        }
+.btn-danger {
+  background: linear-gradient(135deg, #dc3545, #8b0000);
+  border-color: #8b0000;
+}
 
-        @keyframes cardEnter {
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
+.btn-spin {
+  background: linear-gradient(135deg, #ff6347, #cc2200);
+  border-color: #8b0000;
+  font-size: 18px;
+  font-weight: 800;
+  padding: 14px 28px;
+  box-shadow: 
+    0 0 20px rgba(255, 99, 71, 0.5),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  animation: spinPulse 2s ease-in-out infinite;
+}
 
-        /* Footer */
-        footer {
-            margin-top: 4rem;
-            text-align: center;
-            color: var(--text-dim);
-            font-size: 0.8rem;
-            opacity: 0.6;
-        }
+@keyframes spinPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(255, 99, 71, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 30px rgba(255, 99, 71, 0.8), 0 4px 12px rgba(0, 0, 0, 0.4); }
+}
 
-        /* Responsive */
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .input-panel { padding: 1.5rem; }
-            .stat-value { font-size: 1.2rem; }
-        }
-    </style>
+.btn-spin:hover {
+  background: linear-gradient(135deg, #ff7961, #dd3311);
+}
+
+.btn-spin svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Names List */
+.names-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 100px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+}
+
+.names-list::-webkit-scrollbar {
+  width: 5px;
+}
+
+.names-list::-webkit-scrollbar-thumb {
+  background: var(--accent-gold);
+  border-radius: 3px;
+}
+
+.name-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+  background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--border-radius-sm);
+  font-size: 13px;
+  font-weight: 700;
+  animation: chipAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: var(--shadow-1);
+  transition: all 0.2s ease;
+}
+
+@keyframes chipAppear {
+  from { opacity: 0; transform: translateY(-8px) scale(0.8); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.name-chip:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-2);
+}
+
+.name-chip button {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  color: #fff;
+  cursor: pointer;
+  padding: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.name-chip button:hover {
+  background: rgba(255, 0, 0, 0.4);
+}
+
+.name-chip button svg {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+/* History */
+.history-panel {
+  max-height: 80px;
+  overflow-y: auto;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 10px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.history-header svg {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+
+.history-item {
+  padding: 4px 8px;
+  border-left: 3px solid var(--accent-gold);
+  margin-bottom: 3px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 3px;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  animation: historySlide 0.3s ease;
+}
+
+@keyframes historySlide {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Bottom Panel */
+.bottom-panel {
+  align-self: center;
+  margin-top: auto;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding: 10px 14px;
+}
+
+/* Modal */
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+  padding: 20px;
+}
+
+#modal-overlay.active {
+  display: flex;
+  animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal {
+  backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(44, 44, 44, 0.95));
+  border: 3px solid var(--accent-gold);
+  border-radius: var(--border-radius-lg);
+  padding: 32px 24px;
+  max-width: 90%;
+  text-align: center;
+  animation: modalBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 
+    0 0 40px rgba(255, 215, 0, 0.5),
+    0 20px 60px rgba(0, 0, 0, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes modalBounce {
+  0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  50% { transform: scale(1.05) rotate(2deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+.modal-icon {
+  width: 70px;
+  height: 70px;
+  margin: 0 auto 16px;
+  stroke: var(--accent-gold);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 12px var(--accent-gold));
+  animation: trophyFloat 2s ease-in-out infinite;
+}
+
+@keyframes trophyFloat {
+  0%, 100% { transform: translateY(0) rotate(-5deg); }
+  50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+.modal h2 {
+  font-family: 'VT323', monospace;
+  font-size: 48px;
+  color: var(--accent-gold);
+  text-shadow: 
+    3px 3px 0 #000,
+    0 0 20px var(--accent-gold);
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+
+.modal p {
+  font-family: 'VT323', monospace;
+  font-size: 36px;
+  color: #fff;
+  text-shadow: 2px 2px 0 #000;
+  margin-bottom: 24px;
+  line-height: 1.2;
+  word-break: break-word;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .wheel-wrapper {
+    width: 260px;
+    height: 260px;
+  }
+  
+  .wheel-shadow {
+    width: 280px;
+    height: 70px;
+  }
+  
+  .wheel-center {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .wheel-pointer {
+    border-left-width: 15px;
+    border-right-width: 15px;
+    border-top-width: 34px;
+    top: -26px;
+  }
+  
+  .wheel-pointer::after {
+    width: 10px;
+    height: 10px;
+    top: -42px;
+  }
+  
+  .room-face.wall-back { height: 220px; transform: translateZ(-160px) translateY(-110px); }
+  .room-face.wall-left { width: 220px; height: 220px; transform: translateX(-110px) rotateY(90deg) translateY(-110px); }
+  .room-face.wall-right { width: 220px; height: 220px; transform: translateX(110px) rotateY(-90deg) translateY(-110px); }
+  
+  .panel-header { font-size: 18px; }
+  .panel-header svg { width: 22px; height: 22px; }
+  
+  #name-input { font-size: 14px; padding: 9px 12px; }
+  .btn { font-size: 13px; padding: 9px 14px; }
+  .btn-spin { font-size: 16px; padding: 12px 22px; }
+  .btn-spin svg { width: 20px; height: 20px; }
+  
+  .modal h2 { font-size: 38px; }
+  .modal p { font-size: 28px; }
+  .modal-icon { width: 56px; height: 56px; }
+}
+
+@media (max-width: 380px) {
+  .wheel-wrapper {
+    width: 230px;
+    height: 230px;
+  }
+  
+  .wheel-shadow {
+    width: 250px;
+    height: 60px;
+  }
+  
+  .input-group { flex-direction: column; }
+  .btn-spin { width: 100%; }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .room { transform: rotateX(20deg); }
+  .wheel-stage { transform: translate(-50%, -50%) rotateX(-20deg); top: 50%; }
+  
+  #ui-layer {
+    flex-direction: row;
+    flex-wrap: wrap;
+    padding: 8px;
+    gap: 8px;
+  }
+  
+  .glass-panel:first-child {
+    flex: 1;
+    min-width: 280px;
+  }
+  
+  .bottom-panel {
+    width: 100%;
+    margin-top: 0;
+  }
+  
+  .wheel-wrapper { width: 200px; height: 200px; }
+  .wheel-shadow { width: 220px; height: 55px; }
+}
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Gravity Explorer</h1>
-            <p class="subtitle">Simulatore Gravitazionale Interplanetario</p>
-        </header>
-
-        <main>
-            <section class="input-panel">
-                <div class="input-group">
-                    <label for="weightInput">Inserisci il tuo peso sulla Terra</label>
-                    <input type="number" id="weightInput" placeholder="Es. 75" min="1" max="500" step="0.1" aria-label="Peso in kg">
-                    <div id="errorMsg" class="error-msg" aria-live="polite"></div>
-                    <button id="calcBtn" class="btn-calculate">Calcola Dati</button>
-                </div>
-            </section>
-
-            <section id="resultsGrid" class="results-grid" aria-live="polite">
-                <!-- Cards generated by JS -->
-            </section>
-        </main>
-
-        <footer>
-            <p>Dati gravitazionali basati su NASA Fact Sheets. Progetto per GitHub Pages.</p>
-        </footer>
+<div id="viewport">
+  <div class="room" id="room">
+    <div class="room-face floor"></div>
+    <div class="room-face wall-back"></div>
+    <div class="room-face wall-left"></div>
+    <div class="room-face wall-right"></div>
+    
+    <div class="wheel-stage">
+      <div class="wheel-shadow"></div>
+      <div class="wheel-pointer"></div>
+      <div class="wheel-wrapper">
+        <svg class="wheel-svg" id="wheel-svg" viewBox="0 0 300 300"></svg>
+        <div class="wheel-center"></div>
+      </div>
     </div>
+  </div>
+  
+  <canvas id="particle-canvas"></canvas>
+  
+  <div id="ui-layer">
+    <div class="glass-panel">
+      <div class="panel-header">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="10"/>
+          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/>
+        </svg>
+        MINECRAFT WHEEL
+      </div>
+      
+      <div class="input-group">
+        <input type="text" id="name-input" placeholder="Aggiungi nome..." maxlength="30" autocomplete="off">
+        <button class="btn btn-primary" id="add-btn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          Aggiungi
+        </button>
+      </div>
+      
+      <div class="names-list" id="names-list"></div>
+      
+      <div class="history-panel" id="history-panel">
+        <div class="history-header">
+          <svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+          STORICO
+        </div>
+      </div>
+    </div>
+    
+    <div class="bottom-panel glass-panel">
+      <button class="btn btn-spin" id="spin-btn">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+        GIRA!
+      </button>
+      <button class="btn btn-danger" id="reset-btn">
+        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        Reset
+      </button>
+    </div>
+  </div>
+</div>
 
-    <script>
-        /**
-         * Gravity Explorer - Core Logic
-         * @version 1.0.0
-         * @author EriK 3.8.6 Max Preview
-         */
-        (function() {
-            'use strict';
+<div id="modal-overlay">
+  <div class="modal">
+    <svg class="modal-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/>
+      <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/>
+      <path d="M4 22h16"/>
+      <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/>
+      <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/>
+      <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>
+    </svg>
+    <h2>VINCITORE!</h2>
+    <p id="winner-name"></p>
+    <button class="btn btn-primary" id="close-modal-btn">
+      <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+      OK
+    </button>
+  </div>
+</div>
 
-            // NASA Gravity Constants (Surface gravity in m/s^2)
-            // Source: NASA Planetary Fact Sheet
-            const GRAVITY_DATA = Object.freeze({
-                earth: { g: 9.807, name: 'Terra', fact: 'La gravità terrestre è lo standard di riferimento (1g). Mantiene la nostra atmosfera e gli oceani al loro posto.' },
-                moon:  { g: 1.62,  name: 'Luna',  fact: 'La Luna ha solo il 16.6% della gravità terrestre. Gli astronauti Apollo potevano saltare facilmente nonostante le tute pesanti.' },
-                mars:  { g: 3.72,  name: 'Marte', fact: 'Marte ha circa il 38% della gravità terrestre. Un salto qui ti farebbe sentire come un supereroe, ma attento all\'atterraggio!' },
-                jupiter: { g: 24.79, name: 'Giove', fact: 'Giove è un gigante gassoso. La sua gravità è 2.5 volte quella terrestre. Camminare sarebbe impossibile, verresti schiacciato dal tuo stesso peso.' },
-                saturn: { g: 10.44, name: 'Saturno', fact: 'Nonostante le sue dimensioni enormi, Saturno ha una densità bassa. La sua gravità superficiale è solo leggermente superiore a quella terrestre.' },
-                pluto: { g: 0.62, name: 'Plutone', fact: 'Plutone è piccolo e lontano. La sua gravità è debolissima (6% della Terra). Potresti lanciare una palla da baseball in orbita!' }
-            });
+<script>
+'use strict';
 
-            const EARTH_JUMP_HEIGHT_CM = 50; // Base jump height on Earth
+// ===== ICONS =====
+const ICONS = {
+  porkis: '🐷',
+  mcdonald: '🍔',
+  kebab: '🥙',
+  sushi: '🍣',
+  default: '⭐'
+};
 
-            // DOM Elements
-            const els = {
-                input: document.getElementById('weightInput'),
-                btn: document.getElementById('calcBtn'),
-                error: document.getElementById('errorMsg'),
-                grid: document.getElementById('resultsGrid')
-            };
+// ===== STATE =====
+const State = {
+  names: ['porkis', 'mcdonald', 'kebab', 'sushi'],
+  history: [],
+  isSpinning: false,
+  currentAngle: 0,
+  angularVelocity: 0,
+  lastTimestamp: 0,
+  
+  addName(name) {
+    const sanitized = this.sanitizeInput(name);
+    if (!sanitized) return false;
+    if (this.names.length >= 12) {
+      alert('Massimo 12 nomi!');
+      return false;
+    }
+    this.names.push(sanitized);
+    this.save();
+    return true;
+  },
+  
+  removeName(index) {
+    if (index < 0 || index >= this.names.length) return;
+    this.names.splice(index, 1);
+    this.save();
+  },
+  
+  sanitizeInput(input) {
+    if (!input || typeof input !== 'string') return '';
+    const trimmed = input.trim();
+    if (!trimmed) return '';
+    return trimmed.substring(0, 30).replace(/[<>&"']/g, '');
+  },
+  
+  addToHistory(winner) {
+    this.history.unshift({
+      winner: winner,
+      timestamp: new Date().toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })
+    });
+    if (this.history.length > 10) this.history.pop();
+    this.save();
+  },
+  
+  save() {
+    try {
+      localStorage.setItem('mcwheel_names', JSON.stringify(this.names));
+      localStorage.setItem('mcwheel_history', JSON.stringify(this.history));
+    } catch (e) {}
+  },
+  
+  load() {
+    try {
+      const savedNames = localStorage.getItem('mcwheel_names');
+      const savedHistory = localStorage.getItem('mcwheel_history');
+      if (savedNames) {
+        const parsed = JSON.parse(savedNames);
+        if (Array.isArray(parsed) && parsed.length > 0) this.names = parsed;
+      }
+      if (savedHistory) this.history = JSON.parse(savedHistory) || [];
+    } catch (e) {}
+  }
+};
 
-            /**
-             * Validates user input.
-             * @param {string} val - Raw input value.
-             * @returns {number|null} - Parsed valid number or null.
-             */
-            function validateInput(val) {
-                const num = parseFloat(val);
-                if (isNaN(num)) return null;
-                if (num <= 0) return null;
-                if (num > 1000) return null; // Sanity check
-                return num;
-            }
+// ===== AUDIO =====
+const AudioEngine = {
+  ctx: null,
+  init() {
+    try { this.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+  },
+  resume() {
+    if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+  },
+  playTick() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.frequency.value = 800; osc.type = 'square';
+    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.04);
+    osc.start(this.ctx.currentTime); osc.stop(this.ctx.currentTime + 0.04);
+  },
+  playWin() {
+    if (!this.ctx) return;
+    [523, 659, 784, 1047].forEach((freq, i) => {
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.connect(gain); gain.connect(this.ctx.destination);
+      osc.frequency.value = freq; osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, this.ctx.currentTime + i * 0.1);
+      gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + i * 0.1 + 0.3);
+      osc.start(this.ctx.currentTime + i * 0.1); osc.stop(this.ctx.currentTime + i * 0.1 + 0.3);
+    });
+  },
+  playClick() {
+    if (!this.ctx) return;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+    osc.connect(gain); gain.connect(this.ctx.destination);
+    osc.frequency.value = 400; osc.type = 'square';
+    gain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.03);
+    osc.start(this.ctx.currentTime); osc.stop(this.ctx.currentTime + 0.03);
+  }
+};
 
-            /**
-             * Calculates weight and jump height for a planet.
-             * @param {number} massKg - User mass in kg.
-             * @param {number} planetG - Planet gravity m/s^2.
-             * @returns {{weightKg: number, weightN: number, jumpCm: number}}
-             */
-            function calculatePhysics(massKg, planetG) {
-                const earthG = GRAVITY_DATA.earth.g;
-                
-                // Weight in kg-equivalent (what a scale would show)
-                const weightKg = massKg * (planetG / earthG);
-                
-                // Weight in Newtons (Force)
-                const weightN = massKg * planetG;
-                
-                // Jump height: inversely proportional to gravity
-                // h_planet = h_earth * (g_earth / g_planet)
-                const jumpCm = EARTH_JUMP_HEIGHT_CM * (earthG / planetG);
+// ===== PARTICLES =====
+const ParticleSystem = {
+  canvas: null, ctx: null, particles: [], maxParticles: 60,
+  init() {
+    this.canvas = document.getElementById('particle-canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('orientationchange', () => setTimeout(() => this.resize(), 100));
+    this.animate();
+  },
+  resize() {
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  },
+  explode(x, y) {
+    const count = Math.min(this.maxParticles, window.innerWidth < 600 ? 35 : 60);
+    const colors = ['#ff6347', '#ffd700', '#228b22', '#4169e1', '#ff1493', '#ff8c00'];
+    for (let i = 0; i < count; i++) {
+      const angle = (Math.PI * 2 * i) / count;
+      const velocity = 2 + Math.random() * 5;
+      this.particles.push({
+        x, y,
+        vx: Math.cos(angle) * velocity,
+        vy: Math.sin(angle) * velocity,
+        size: 4 + Math.random() * 7,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        life: 1, decay: 0.012 + Math.random() * 0.01, gravity: 0.18
+      });
+    }
+  },
+  animate() {
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    for (let i = this.particles.length - 1; i >= 0; i--) {
+      const p = this.particles[i];
+      p.x += p.vx; p.y += p.vy; p.vy += p.gravity; p.vx *= 0.98; p.life -= p.decay;
+      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+      this.ctx.globalAlpha = p.life;
+      this.ctx.fillStyle = p.color;
+      this.ctx.fillRect(Math.floor(p.x - p.size/2), Math.floor(p.y - p.size/2), p.size, p.size);
+    }
+    this.ctx.globalAlpha = 1;
+    requestAnimationFrame(() => this.animate());
+  }
+};
 
-                return {
-                    weightKg: Math.round(weightKg * 100) / 100,
-                    weightN: Math.round(weightN * 100) / 100,
-                    jumpCm: Math.round(jumpCm * 100) / 100
-                };
-            }
+// ===== WHEEL RENDERER (SVG) =====
+const WheelRenderer = {
+  colors: ['#ff6347', '#ffd700', '#228b22', '#4169e1', '#ff1493', '#ff8c00', '#9370db', '#20b2aa', '#dc143c', '#00ced1', '#ff4500', '#7cfc00'],
+  
+  render(names) {
+    const svg = document.getElementById('wheel-svg');
+    svg.innerHTML = '';
+    
+    if (names.length === 0) return;
+    
+    const cx = 150, cy = 150, r = 140;
+    const segmentAngle = 360 / names.length;
+    
+    // Outer ring
+    const outerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    outerRing.setAttribute('cx', cx);
+    outerRing.setAttribute('cy', cy);
+    outerRing.setAttribute('r', r + 5);
+    outerRing.setAttribute('fill', 'none');
+    outerRing.setAttribute('stroke', '#8b6914');
+    outerRing.setAttribute('stroke-width', '6');
+    svg.appendChild(outerRing);
+    
+    // Segments
+    names.forEach((name, index) => {
+      const startAngle = index * segmentAngle - 90; // -90 to start from top
+      const endAngle = startAngle + segmentAngle;
+      
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      
+      const x1 = cx + r * Math.cos(startRad);
+      const y1 = cy + r * Math.sin(startRad);
+      const x2 = cx + r * Math.cos(endRad);
+      const y2 = cy + r * Math.sin(endRad);
+      
+      const largeArc = segmentAngle > 180 ? 1 : 0;
+      
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`);
+      path.setAttribute('fill', this.colors[index % this.colors.length]);
+      path.setAttribute('stroke', '#1a1a1a');
+      path.setAttribute('stroke-width', '2');
+      svg.appendChild(path);
+      
+      // Text
+      const midAngle = startAngle + segmentAngle / 2;
+      const midRad = (midAngle * Math.PI) / 180;
+      const textR = r * 0.65;
+      const textX = cx + textR * Math.cos(midRad);
+      const textY = cy + textR * Math.sin(midRad);
+      
+      const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      text.setAttribute('x', textX);
+      text.setAttribute('y', textY);
+      text.setAttribute('text-anchor', 'middle');
+      text.setAttribute('dominant-baseline', 'central');
+      text.setAttribute('fill', '#fff');
+      text.setAttribute('font-family', 'VT323, monospace');
+      text.setAttribute('font-size', names.length > 8 ? '14' : '18');
+      text.setAttribute('font-weight', 'bold');
+      text.setAttribute('stroke', '#000');
+      text.setAttribute('stroke-width', '0.5');
+      text.setAttribute('transform', `rotate(${midAngle + 90}, ${textX}, ${textY})`);
+      text.textContent = name;
+      svg.appendChild(text);
+    });
+    
+    // Inner decorative ring
+    const innerRing = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    innerRing.setAttribute('cx', cx);
+    innerRing.setAttribute('cy', cy);
+    innerRing.setAttribute('r', 30);
+    innerRing.setAttribute('fill', 'none');
+    innerRing.setAttribute('stroke', '#ffd700');
+    innerRing.setAttribute('stroke-width', '3');
+    svg.appendChild(innerRing);
+  }
+};
 
-            /**
-             * Creates a Planet Card DOM element.
-             * @param {string} key - Planet key.
-             * @param {object} data - Planet data.
-             * @param {object} physics - Calculated physics.
-             * @param {number} delay - Animation delay in ms.
-             * @returns {HTMLElement}
-             */
-            function createCard(key, data, physics, delay) {
-                const card = document.createElement('article');
-                card.className = 'planet-card';
-                card.style.animationDelay = `${delay}ms`;
-                
-                // Use textContent for security (XSS prevention)
-                card.innerHTML = `
-                    <h2 class="planet-name"></h2>
-                    <div class="stat-row">
-                        <span class="stat-label">Peso Equivalente</span>
-                        <span class="stat-value"><span class="val-kg"></span><span class="stat-unit">kg</span></span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Forza Peso</span>
-                        <span class="stat-value"><span class="val-n"></span><span class="stat-unit">N</span></span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">Altezza Salto</span>
-                        <span class="stat-value"><span class="val-jump"></span><span class="stat-unit">cm</span></span>
-                    </div>
-                    <div class="fact-box">
-                        <strong>LO SAPEVI?</strong> <span class="fact-text"></span>
-                    </div>
-                `;
+// ===== WHEEL PHYSICS =====
+const WheelPhysics = {
+  friction: 0.985,
+  minVelocity: 0.15,
+  
+  spin() {
+    if (State.isSpinning) return;
+    if (State.names.length === 0) { alert('Aggiungi almeno un nome!'); return; }
+    
+    State.isSpinning = true;
+    State.angularVelocity = 18 + Math.random() * 12;
+    State.lastTimestamp = performance.now();
+    
+    document.getElementById('spin-btn').disabled = true;
+    this.animate();
+  },
+  
+  animate() {
+    if (!State.isSpinning) return;
+    
+    const now = performance.now();
+    const delta = Math.min(now - State.lastTimestamp, 50);
+    State.lastTimestamp = now;
+    
+    State.currentAngle += State.angularVelocity * (delta / 16);
+    State.angularVelocity *= this.friction;
+    
+    const svg = document.getElementById('wheel-svg');
+    svg.style.transform = `rotate(${State.currentAngle}deg)`;
+    svg.style.transformOrigin = '150px 150px';
+    
+    if (Math.abs(State.angularVelocity) > 1 && Math.random() < 0.15) {
+      AudioEngine.playTick();
+    }
+    
+    if (Math.abs(State.angularVelocity) < this.minVelocity) {
+      this.finishSpin();
+      return;
+    }
+    
+    requestAnimationFrame(() => this.animate());
+  },
+  
+  finishSpin() {
+    State.isSpinning = false;
+    State.angularVelocity = 0;
+    
+    const normalizedAngle = ((State.currentAngle % 360) + 360) % 360;
+    const segmentAngle = 360 / State.names.length;
+    // Pointer is at top (0°/360°), segments start from -90° in SVG
+    const winnerIndex = Math.floor(((360 - normalizedAngle) % 360) / segmentAngle) % State.names.length;
+    const winner = State.names[winnerIndex];
+    
+    State.addToHistory(winner);
+    document.getElementById('spin-btn').disabled = false;
+    
+    setTimeout(() => this.showWinner(winner), 300);
+  },
+  
+  showWinner(name) {
+    AudioEngine.playWin();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100]);
+    
+    const viewport = document.getElementById('viewport');
+    const rect = viewport.getBoundingClientRect();
+    const centerX = rect.width / 2;
+    const centerY = rect.height * 0.55;
+    
+    for (let i = 0; i < 5; i++) {
+      setTimeout(() => {
+        ParticleSystem.explode(
+          centerX + (Math.random() - 0.5) * 120,
+          centerY + (Math.random() - 0.5) * 80
+        );
+      }, i * 100);
+    }
+    
+    document.getElementById('winner-name').textContent = name;
+    document.getElementById('modal-overlay').classList.add('active');
+  }
+};
 
-                // Populate safely
-                card.querySelector('.planet-name').textContent = data.name;
-                card.querySelector('.val-kg').textContent = physics.weightKg.toFixed(2);
-                card.querySelector('.val-n').textContent = physics.weightN.toFixed(2);
-                card.querySelector('.val-jump').textContent = physics.jumpCm.toFixed(1);
-                card.querySelector('.fact-text').textContent = data.fact;
+// ===== UI CONTROLLER =====
+const UIController = {
+  init() {
+    document.getElementById('add-btn').addEventListener('click', () => this.addName());
+    document.getElementById('name-input').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.addName();
+    });
+    
+    document.getElementById('spin-btn').addEventListener('click', () => {
+      AudioEngine.resume();
+      AudioEngine.playClick();
+      WheelPhysics.spin();
+    });
+    
+    document.getElementById('reset-btn').addEventListener('click', () => this.reset());
+    document.getElementById('close-modal-btn').addEventListener('click', () => this.closeModal());
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-overlay') this.closeModal();
+    });
+    
+    // Room drag rotation
+    const room = document.getElementById('room');
+    let isDragging = false, startX = 0, rotY = 0;
+    
+    room.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.wheel-stage')) return;
+      isDragging = true; startX = e.clientX;
+      AudioEngine.resume();
+    });
+    
+    document.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      rotY += (e.clientX - startX) * 0.3;
+      rotY = Math.max(-30, Math.min(30, rotY));
+      room.style.transform = `rotateX(28deg) rotateY(${rotY}deg)`;
+      startX = e.clientX;
+    });
+    
+    document.addEventListener('pointerup', () => { isDragging = false; });
+    document.addEventListener('pointercancel', () => { isDragging = false; });
+    
+    this.updateNamesList();
+    this.updateHistory();
+  },
+  
+  addName() {
+    const input = document.getElementById('name-input');
+    if (State.addName(input.value)) {
+      input.value = '';
+      AudioEngine.playClick();
+      this.updateNamesList();
+      WheelRenderer.render(State.names);
+      input.focus();
+    }
+  },
+  
+  updateNamesList() {
+    const list = document.getElementById('names-list');
+    list.innerHTML = '';
+    
+    State.names.forEach((name, index) => {
+      const chip = document.createElement('div');
+      chip.className = 'name-chip';
+      chip.innerHTML = `<span>${ICONS[name.toLowerCase()] || ICONS.default} ${name}</span>
+        <button data-index="${index}"><svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+      list.appendChild(chip);
+    });
+    
+    list.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const index = parseInt(e.currentTarget.dataset.index);
+        State.removeName(index);
+        AudioEngine.playClick();
+        this.updateNamesList();
+        WheelRenderer.render(State.names);
+      });
+    });
+  },
+  
+  updateHistory() {
+    const panel = document.getElementById('history-panel');
+    panel.innerHTML = `<div class="history-header">
+      <svg viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+      STORICO</div>`;
+    
+    State.history.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'history-item';
+      div.textContent = `[${item.timestamp}] ${item.winner}`;
+      panel.appendChild(div);
+    });
+  },
+  
+  closeModal() {
+    document.getElementById('modal-overlay').classList.remove('active');
+    this.updateHistory();
+  },
+  
+  reset() {
+    if (confirm('Vuoi resettare tutto?')) {
+      State.names = ['porkis', 'mcdonald', 'kebab', 'sushi'];
+      State.history = [];
+      State.currentAngle = 0;
+      State.save();
+      WheelRenderer.render(State.names);
+      this.updateNamesList();
+      this.updateHistory();
+      AudioEngine.playClick();
+      document.getElementById('wheel-svg').style.transform = 'rotate(0deg)';
+    }
+  }
+};
 
-                return card;
-            }
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  State.load();
+  AudioEngine.init();
+  ParticleSystem.init();
+  WheelRenderer.render(State.names);
+  UIController.init();
+  document.addEventListener('click', () => AudioEngine.resume(), { once: true });
+});
 
-            /**
-             * Main calculation and render handler.
-             */
-            function handleCalculate() {
-                const rawVal = els.input.value.trim();
-                const mass = validateInput(rawVal);
+window.addEventListener('beforeunload', () => State.save());
+</script>
 
-                // Reset UI
-                els.error.textContent = '';
-                els.grid.innerHTML = '';
-                els.grid.classList.remove('visible');
-
-                if (!mass) {
-                    els.error.textContent = '⚠️ Inserisci un peso valido (es. 70.5). Max 1000 kg.';
-                    els.input.focus();
-                    return;
-                }
-
-                // Use DocumentFragment for batch DOM insertion (Performance)
-                const fragment = document.createDocumentFragment();
-                const planets = ['moon', 'mars', 'jupiter', 'saturn', 'pluto'];
-                let delay = 0;
-
-                planets.forEach(key => {
-                    const pData = GRAVITY_DATA[key];
-                    const physics = calculatePhysics(mass, pData.g);
-                    const card = createCard(key, pData, physics, delay);
-                    fragment.appendChild(card);
-                    delay += 100; // Stagger animation
-                });
-
-                els.grid.appendChild(fragment);
-                
-                // Trigger animation
-                requestAnimationFrame(() => {
-                    els.grid.classList.add('visible');
-                });
-            }
-
-            // Event Listeners
-            els.btn.addEventListener('click', handleCalculate);
-            
-            // Allow Enter key to submit
-            els.input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    handleCalculate();
-                }
-            });
-
-            // Input sanitization on type (allow only numbers and dot)
-            els.input.addEventListener('input', (e) => {
-                e.target.value = e.target.value.replace(/[^0-9.]/g, '');
-            });
-
-        })();
-    </script>
 </body>
 </html>
